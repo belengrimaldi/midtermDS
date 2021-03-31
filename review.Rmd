@@ -1,0 +1,59 @@
+---
+title: "ggmap Package Overview"
+author: "Belen Gomez Grimaldi, Kay Mattern, and Amanda Rein"
+date: "4/6/2021"
+output:
+  html_document:
+    toc: TRUE
+    theme: journal
+    toc_float: TRUE
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE}
+install.packages("dplyr")
+library(dplyr)
+install.packages("DT")
+library(DT)
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("tidytext")
+library(tidytext)
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("ggmap")
+library(ggmap)
+```
+
+## Package Overview
+
+## Important Functions
+
+## Examples of Usage {.tabset}
+
+### 1
+
+### 2
+
+### 3
+
+## Similar Packages {.tabset}
+
+### Leaflet
+
+### Tmap 
+
+### MapView
+
+## Reflection
+
+## Pros and Cons
+
+## Suggestions
+
+## Sources
