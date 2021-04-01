@@ -82,7 +82,7 @@ n$label <-paste(n$Rank, n$Location, sep="-")
 library("ggmap")
 
 #Set your API Key
-key <- read_lines("api")
+key <- read_lines("api.txt")
 ggmap::register_google(key = key)
 
 # Plot data using ggmap
