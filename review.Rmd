@@ -16,28 +16,42 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# install.packages("dplyr")
+install.packages("dplyr")
 library(dplyr)
-# install.packages("DT")
+install.packages("DT")
 library(DT)
-# install.packages("tidyverse")
+install.packages("tidyverse")
 library(tidyverse)
-# install.packages("tidytext")
+install.packages("tidytext")
 library(tidytext)
-# install.packages("ggplot2")
+install.packages("ggplot2")
 library(ggplot2)
-# install.packages("ggmap")
+install.packages("ggmap")
 library(ggmap)
-# install.packages("lubridate")
+install.packages("lubridate")
 library(lubridate)
-# install.packages("ggrepel")
+install.packages("ggrepel")
 library(ggrepel)
-# install.packages("tidyverse")
+install.packages("tidyverse")
 library(tidyverse)
+install.packages("devtools")
+library(devtools)
+library(usethis)
 devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
 ```
 
 ## Package Overview
+The package ggmap applies ggplot2 capabilities and grammar to Google Maps, OpenStreetMap, Stamen Maps, or CloudMade Maps. All of the geometries of ggplot2 are available, with the familiar appearance/features of popular map applications like Google Maps.
+There are 2 steps to using this package: download map raster (aka data in grid format, with each pixel corresponding to a particular geographic location) and then plot raster + data overlaying the map. 
+
+### Dependencies
+The ggmap package is dependent on ggplot2.
+
+### Imports
+The ggmap package imports tibble, jpeg, rjson, scales, png, dplyr, strinr, httr, tidyr, RgoogleMaps, digest, glue, magrittr, purrr, plyr, and bitops.
+
+### Version Information
+The ggmap package is currently on version 3.0.0. There were mainly bug fixes between versions 1 and 2, whereas version 3 was created to address Google’s recent API requirements change that requires users to register with Google to use ggmap.
 
 ## Important Functions
 
@@ -105,7 +119,46 @@ p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2, 
 p
 ```
 
-### 2
+### Heat Map of Most Dangerous Crimes in Seattle
+This graph is a continuation of the previous graph. It filters the crime to the most dangerous crimes, then adds on a density plot accordingly.
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+unique(i2$Event.Clearance.Group)
+i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'SUSPICIOUS CIRCUMSTANCES', 
+                                                      'BURGLARY', 'PROWLER', 'ASSAULTS', 'PROPERTY DAMAGE', 
+                                                      'ARREST', 'NARCOTICS COMPLAINTS','THREATS', 'HARASSMENT', 'WEAPONS CALLS',
+                                                      'PROSTITUTION' , 'ROBBERY', 'FAILURE TO REGISTER (SEX OFFENDER)', 'LEWD CONDUCT', 
+                                                      'HOMICIDE'))
+attach(i2Dangerous)
+
+p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) + 
+  theme(legend.position="bottom")  +
+  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) + 
+  geom_label_repel(
+    aes(x, y, label = label),
+    data=n,
+    family = 'Times', 
+    size = 3, 
+    box.padding = 0.2, point.padding = 0.3,
+    segment.color = 'grey50')
+
+p <- p + stat_density2d(
+    aes(x = Longitude, y = Latitude, fill = ..level.., alpha = 0.25),
+    size = 0.01, bins = 30, data = i2Dangerous,
+    geom = "polygon"
+  ) +
+  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) + 
+  geom_label_repel(
+    aes(x, y, label = label),
+    data=n,
+    family = 'Times', 
+    size = 3, 
+    box.padding = 0.2, point.padding = 0.3,
+    segment.color = 'grey50') 
+
+p
+```
+
 
 ### 3
 
