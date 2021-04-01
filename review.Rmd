@@ -82,7 +82,8 @@ n$label <-paste(n$Rank, n$Location, sep="-")
 library("ggmap")
 
 #Set your API Key
-ggmap::register_google(key = "AIzaSyBSJA215QI0sB-_J8Zn1hS8n8wlzu336G8")
+key <- read_lines("api")
+ggmap::register_google(key = key)
 
 # Plot data using ggmap
 p <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
