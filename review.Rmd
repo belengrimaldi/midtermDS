@@ -7,7 +7,7 @@ output:
     toc: TRUE
     theme: journal
     toc_float: TRUE
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -15,19 +15,26 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, echo=FALSE, message=FALSE}
-install.packages("dplyr")
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# install.packages("dplyr")
 library(dplyr)
-install.packages("DT")
+# install.packages("DT")
 library(DT)
-install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
-install.packages("tidytext")
+# install.packages("tidytext")
 library(tidytext)
-install.packages("ggplot2")
+# install.packages("ggplot2")
 library(ggplot2)
-install.packages("ggmap")
+# install.packages("ggmap")
 library(ggmap)
+# install.packages("lubridate")
+library(lubridate)
+# install.packages("ggrepel")
+library(ggrepel)
+# install.packages("tidyverse")
+library(tidyverse)
+devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
 ```
 
 ## Package Overview
@@ -36,7 +43,66 @@ library(ggmap)
 
 ## Examples of Usage {.tabset}
 
-### 1
+### Crime in Seattle Map
+This map shows where in Seatle crime has occured, and overlaid over that map are markers of where the most dangerous neighborhoods are located.
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+# Code for example comes from a tutorial found at: 
+# https://www.littlemissdata.com/blog/maps
+
+# Data Prep
+
+incidents= read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/i2Sample.csv', stringsAsFactors = FALSE)
+
+n <- read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/n.csv', stringsAsFactors = FALSE)
+
+# Colors for graphing
+
+col1 = "#5287a0"
+col2 = "#6497b1"
+col3 = "#b3cde0"
+col4 = "#CC0000"
+
+#add year to the incidents data frame
+incidents$ymd <-mdy_hms(incidents$Event.Clearance.Date)
+incidents$year <- year(incidents$ymd)
+
+#Create a more manageable data frame with only 2017 and 2018 data
+i2 <- incidents %>%
+  filter(year>=2017 & year<=2018)
+
+#Only include complete cases
+i2 <- i2[complete.cases(i2), ]
+
+#create a display label to the n data frame (dangerous neighbourhoods)
+n$label <-paste(n$Rank, n$Location, sep="-")
+
+# Load the library
+library("ggmap")
+
+#Set your API Key
+ggmap::register_google(key = "AIzaSyBSJA215QI0sB-_J8Zn1hS8n8wlzu336G8")
+
+# Plot data using ggmap
+p <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
+                    zoom = 11, scale = 2,
+                    maptype ='terrain',
+                    color = 'color'))
+
+p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2, alpha=0.25, size = 0.5) +
+  theme(legend.position="bottom")  +
+  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =2.5) +
+  geom_label_repel(
+    aes(x, y, label = label),
+    data=n,
+    family = 'Times',
+    size = 4,
+    box.padding = 0.2, point.padding = 0.3,
+    segment.color = 'grey50')
+
+p
+```
 
 ### 2
 
@@ -46,14 +112,70 @@ library(ggmap)
 
 ### Leaflet
 
+The package Leaflet is similar in that it also allows you to  create maps within R. It is used along with OpenStreetMap to make interactive maps and add information to the maps. You can add markers and tiles and render spatial objects onto the maps you create.
+
+The main difference between ggmap and Leaflet is that Leaflet does not allow you to add in any stats that you calculate. The main purpose of Leaflet is to create maps that you want to visualize. It is, however, also much more dynamic than ggmap in that you can add interactivity and easily render spatial objects. 
+
+
 ### Tmap 
+
+Tmap is a package is very similar to ggmap because it is based on the syntax of ggplot2. This allows it to have ease of use like ggmap, because it relies on a syntax that many people are already used to.
+
+Tmaps allows you to create static or interactive maps, allowing you to see different information on the same map by using facets. You can also overlay tiles to represent information, like relative population size. It is also a useful tool for creating heatmaps. Importantly, the main difference between Tmaps and ggmaps is that Tmaps is more interactive and dynamic, allowing you to showcase more information on one map.
 
 ### MapView
 
+The MapView package allows for interactive visualizations of spatial data on maps. It is a package that is designed to handle very large amounts of data, which can be useful in specific data analyses. You can also toggle and get different information with queries by clicking on points on the maps that are created. 
+
+Again, the main difference between this package and ggplot is its level of interactivity and ability to see more information from the maps created.
+
+
 ## Reflection
 
-## Pros and Cons
+### Pros
 
-## Suggestions
+The main pros of this package include:
 
-## Sources
+* Familiarity with ggplot language
+  + layering has a similar syntax
+* Don’t need to know coordinates or full address
+  + You can just input a city or state, which is good if you don't know exactly where you’re looking into
+* Can incorporate data points and information into the map
+* Depth of function capabilities
+  + can do a lot more than just rendering a graph
+
+### Cons
+
+The two main cons of this package are as follows:
+
+* Not interactive
+  + can’t overlay different information onto the map
+* Requires a Google account if you want to use Google Maps
+
+### Suggestions
+
+Some suggestions we have on features that could be added or tweaked are: 
+* More interactivity and ability to layer would be useful for displaying more information at once
+* It would be interesting to perhaps be able to create 3D representations of the maps with information overlayed onto the 3D map
+
+## Sources {.tabset}
+
+### Package Overview
+
+
+### Important Functions
+
+
+### Examples
+https://www.littlemissdata.com/blog/maps
+
+
+### Similar Packages
+
+https://rstudio.github.io/leaflet/
+
+https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.htm
+
+https://r-spatial.github.io/mapview/
+
+
