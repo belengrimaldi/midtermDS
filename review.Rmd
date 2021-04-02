@@ -16,25 +16,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-install.packages("dplyr")
+# install.packages("dplyr")
 library(dplyr)
-install.packages("DT")
+# install.packages("DT")
 library(DT)
-install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
-install.packages("tidytext")
+# install.packages("tidytext")
 library(tidytext)
-install.packages("ggplot2")
+# install.packages("ggplot2")
 library(ggplot2)
-install.packages("ggmap")
+# install.packages("ggmap")
 library(ggmap)
-install.packages("lubridate")
+# install.packages("lubridate")
 library(lubridate)
-install.packages("ggrepel")
+# install.packages("ggrepel")
 library(ggrepel)
-install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
-install.packages("devtools")
+# install.packages("devtools")
 library(devtools)
 library(usethis)
 devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
@@ -123,7 +123,7 @@ p
 This graph is a continuation of the previous graph. It filters the crime to the most dangerous crimes, then adds on a density plot accordingly.
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 
-unique(i2$Event.Clearance.Group)
+# unique(i2$Event.Clearance.Group)
 i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'SUSPICIOUS CIRCUMSTANCES', 
                                                       'BURGLARY', 'PROWLER', 'ASSAULTS', 'PROPERTY DAMAGE', 
                                                       'ARREST', 'NARCOTICS COMPLAINTS','THREATS', 'HARASSMENT', 'WEAPONS CALLS',
@@ -131,7 +131,7 @@ i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'S
                                                       'HOMICIDE'))
 attach(i2Dangerous)
 
-p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) + 
+p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) + 
   theme(legend.position="bottom")  +
   geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) + 
   geom_label_repel(
@@ -192,9 +192,12 @@ The main pros of this package include:
 
 * Familiarity with ggplot language
   + layering has a similar syntax
+  
 * Don’t need to know coordinates or full address
   + You can just input a city or state, which is good if you don't know exactly where you’re looking into
+  
 * Can incorporate data points and information into the map
+
 * Depth of function capabilities
   + can do a lot more than just rendering a graph
 
@@ -204,12 +207,14 @@ The two main cons of this package are as follows:
 
 * Not interactive
   + can’t overlay different information onto the map
+  
 * Requires a Google account if you want to use Google Maps
 
 ### Suggestions
 
 Some suggestions we have on features that could be added or tweaked are: 
 * More interactivity and ability to layer would be useful for displaying more information at once
+
 * It would be interesting to perhaps be able to create 3D representations of the maps with information overlayed onto the 3D map
 
 ## Sources {.tabset}
