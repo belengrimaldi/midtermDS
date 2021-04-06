@@ -34,6 +34,10 @@ library(lubridate)
 library(ggrepel)
 # install.packages("tidyverse")
 library(tidyverse)
+# install.packages("devtools")
+library(devtools)
+library(usethis)
+devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
 ```
 
 ## Package Overview
@@ -49,11 +53,38 @@ The ggmap package imports tibble, jpeg, rjson, scales, png, dplyr, strinr, httr,
 ### Version Information
 The ggmap package is currently on version 3.0.0. There were mainly bug fixes between versions 1 and 2, whereas version 3 was created to address Google’s recent API requirements change that requires users to register with Google to use ggmap.
 
-## Important Functions
+## Important Functions {.tabset}
+
+### get_map()
+The get_map function downloads a map as an image and formats the image for plotting (the result is a specially classed raster object). The function takes in a variety of parameters including location, mapttype, source and color. If you plan on using the results of this function to create a plot with ggmap, this function must be executed first.
+
+### ggmap()
+The ggmap function is the main function in the ggmap package. It takes the raster object created by the get_map function and creates a ggplot object which draws the map. You can use the typical ggplot layers to customize and add detail to your map. The function takes in a variety of parameters including ggmap, base_layer (which includes typical ggplot aes calls) and legend. Examples of ggmap can be found under the Examples of Usage section.
+
+### geocode()
+The geocode function accepts character strings and returns a data frame of geographic information. The default output is simple, which only includes latitude and longitude, but you can specify output='more' as a parameter to get more in-depth location information. Below you will see location information for the University of Virginia.
+
+```{r, echo=FALSE, message=FALSE}
+key <- read_lines("api.txt")
+ggmap::register_google(key = key)
+
+uva_info <- geocode("university of virginia", output='more')
+datatable(uva_info, options= list(scrollX=T))
+```
+
+### mapdist()
+The mapdist function provides distances for Google-determined routes and estimated duration. You must specify the locations from (first parameter) and to (second parameter). These can be physical addresses, landmarks or geographic coordinates. A useful parameter is mode, which can be set to driving, walking, cycling or transit. Changing the mode will change the estimated duration for the given route. 
+
+### qmap()
+The qmap function provides a map around a landmark or city. Zoom is a useful parameter that will zoom in or out of the map. In addition, the maptype parameter allows you to specify the type of map in your output, suhc as hybrid, satellite, watercolor, etc. Below is a zoomed-in hyrbid map around the University of Virginia.
+
+```{r, echo=FALSE, results='hide', message=FALSE}
+qmap("university of virginia", zoom=15, maptype='hybrid')
+```
 
 ## Examples of Usage {.tabset}
 
-### Crime in Seattle Map
+### Crime in Seattle
 This map shows where in Seatle crime has occured, and overlaid over that map are markers of where the most dangerous neighborhoods are located.
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -115,11 +146,22 @@ p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2, 
 p
 ```
 
+
 ### Heat Map of Most Dangerous Crimes in Seattle
 This graph is a continuation of the previous graph. It filters the crime to the most dangerous crimes, then adds on a density plot accordingly.
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 key <- read_lines("api.txt")
 ggmap::register_google(key = key)
+
+incidents$ymd <-mdy_hms(incidents$Event.Clearance.Date)
+incidents$year <- year(incidents$ymd)
+
+#Create a more manageable data frame with only 2017 and 2018 data
+i2 <- incidents %>%
+  filter(year>=2017 & year<=2018)
+
+#Only include complete cases
+i2 <- i2[complete.cases(i2), ]
 
 i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'SUSPICIOUS CIRCUMSTANCES', 
                                                       'BURGLARY', 'PROWLER', 'ASSAULTS', 'PROPERTY DAMAGE', 
@@ -132,6 +174,17 @@ p <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
                     zoom = 11, scale = 2,
                     maptype ='terrain',
                     color = 'color'))
+
+p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) +
+  theme(legend.position="bottom")  +
+  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) +
+  geom_label_repel(
+    aes(x, y, label = label),
+    data=n,
+    family = 'Times',
+    size = 3,
+    box.padding = 0.2, point.padding = 0.3,
+    segment.color = 'grey50')
 
 p <- p + stat_density2d(
     aes(x = Longitude, y = Latitude, fill = ..level.., alpha = 0.25),
@@ -151,7 +204,47 @@ p
 ```
 
 
-### 3
+### Crime in Seattle by Year
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+incidents= read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/i2Sample.csv', stringsAsFactors = FALSE)
+
+n <- read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/n.csv', stringsAsFactors = FALSE)
+
+#add year to the incidents data frame
+incidents$ymd <-mdy_hms(incidents$Event.Clearance.Date)
+incidents$year <- year(incidents$ymd)
+
+# Subset of incidents with 4 years of data
+
+i3 <- incidents %>%
+  filter(year>=2015 & year<=2018) %>%
+  drop_na()
+
+# Drop incomplete cases
+i3 <- i3[complete.cases(i3), ]
+
+# Filter top 4 incidents
+i2Sub <-filter(i2, Event.Clearance.Group %in% c('TRAFFIC RELATED CALLS', 'DISTURBANCES', 'SUSPICIOUS CIRCUMSTANCES', 'MOTOR VEHICLE COLLISION INVESTIGATION'))
+
+# Plot for top 4 occurring incidents
+graph3 <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
+                    zoom = 11, scale = 2,
+                    maptype ='satellite',
+                    color = 'color'))
+
+graph3 + stat_density2d(
+    aes(x = Longitude, y = Latitude, fill = ..level.., alpha =..level..),
+    size = 0.2, bins = 30, data = i2Sub,
+    geom = "polygon"
+  ) +
+  geom_density2d(data = i2Sub,
+                 aes(x = Longitude, y = Latitude), size = 0.3) +
+  facet_wrap(~ Event.Clearance.Group, nrow=2) +
+  labs(x = 'Longitude', y='Latitude', title='Seattle Crime: Top 4 Occurring Incidents')
+
+```
+
 
 ## Similar Packages {.tabset}
 
@@ -183,9 +276,12 @@ The main pros of this package include:
 
 * Familiarity with ggplot language
   + layering has a similar syntax
+  
 * Don’t need to know coordinates or full address
   + You can just input a city or state, which is good if you don't know exactly where you’re looking into
+  
 * Can incorporate data points and information into the map
+
 * Depth of function capabilities
   + can do a lot more than just rendering a graph
 
@@ -195,12 +291,14 @@ The two main cons of this package are as follows:
 
 * Not interactive
   + can’t overlay different information onto the map
+  
 * Requires a Google account if you want to use Google Maps
 
 ### Suggestions
 
 Some suggestions we have on features that could be added or tweaked are: 
 * More interactivity and ability to layer would be useful for displaying more information at once
+
 * It would be interesting to perhaps be able to create 3D representations of the maps with information overlayed onto the 3D map
 
 ## Sources {.tabset}
@@ -209,6 +307,11 @@ Some suggestions we have on features that could be added or tweaked are:
 
 
 ### Important Functions
+https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/get_map 
+https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/ggmap 
+https://www.rdocumentation.org/packages/ggmap/versions/2.6.1/topics/geocode
+https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/mapdist
+https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/qmap
 
 
 ### Examples
