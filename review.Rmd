@@ -22,7 +22,7 @@ library(stringr)
 library(dplyr)
 # install.packages("DT")
 library(DT)
-#install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
 # install.packages("tidytext")
 library(tidytext)
@@ -86,7 +86,7 @@ qmap("university of virginia", zoom=15, maptype='hybrid')
 
 ## Examples of Usage {.tabset}
 
-### Crime in Seattle Map
+### Crime in Seattle
 This map shows where in Seatle crime has occured, and overlaid over that map are markers of where the most dangerous neighborhoods are located.
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -148,11 +148,23 @@ p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2, 
 p
 ```
 
+
 ### Heat Map of Most Dangerous Crimes in Seattle
 This graph is a continuation of the previous graph. It filters the crime to the most dangerous crimes, then adds on a density plot accordingly.
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
+key <- read_lines("api.txt")
+ggmap::register_google(key = key)
 
-# unique(i2$Event.Clearance.Group)
+incidents$ymd <-mdy_hms(incidents$Event.Clearance.Date)
+incidents$year <- year(incidents$ymd)
+
+#Create a more manageable data frame with only 2017 and 2018 data
+i2 <- incidents %>%
+  filter(year>=2017 & year<=2018)
+
+#Only include complete cases
+i2 <- i2[complete.cases(i2), ]
+
 i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'SUSPICIOUS CIRCUMSTANCES', 
                                                       'BURGLARY', 'PROWLER', 'ASSAULTS', 'PROPERTY DAMAGE', 
                                                       'ARREST', 'NARCOTICS COMPLAINTS','THREATS', 'HARASSMENT', 'WEAPONS CALLS',
@@ -160,14 +172,19 @@ i2Dangerous <-filter(i2, Event.Clearance.Group %in% c('TRESPASS', 'ASSAULTS', 'S
                                                       'HOMICIDE'))
 attach(i2Dangerous)
 
-p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) + 
+p <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
+                    zoom = 11, scale = 2,
+                    maptype ='terrain',
+                    color = 'color'))
+
+p <- p + geom_point(aes(x = Longitude, y = Latitude), colour = col1, data = i2Dangerous, alpha=0.25, size = 0.5) +
   theme(legend.position="bottom")  +
-  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) + 
+  geom_point(aes(x = x, y = y, stroke = 2), colour=col4, data = n, size =1.5) +
   geom_label_repel(
     aes(x, y, label = label),
     data=n,
-    family = 'Times', 
-    size = 3, 
+    family = 'Times',
+    size = 3,
     box.padding = 0.2, point.padding = 0.3,
     segment.color = 'grey50')
 
@@ -190,9 +207,22 @@ p
 
 
 ### Crime in Seattle by Year
+<<<<<<< HEAD
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+=======
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+incidents= read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/i2Sample.csv', stringsAsFactors = FALSE)
+
+n <- read.csv('https://raw.githubusercontent.com/lgellis/MiscTutorial/master/ggmap/n.csv', stringsAsFactors = FALSE)
+
+#add year to the incidents data frame
+incidents$ymd <-mdy_hms(incidents$Event.Clearance.Date)
+incidents$year <- year(incidents$ymd)
+>>>>>>> 567067bbd2f6c32c57fd9d2d08d6d563aa1486ac
 
 # Subset of incidents with 4 years of data
+
 i3 <- incidents %>%
   filter(year>=2015 & year<=2018) %>%
   drop_na()
@@ -223,12 +253,17 @@ graph3 + stat_density2d(
     size = 0.2, bins = 30, data = i3Sub,
     geom = "polygon"
   ) +
+<<<<<<< HEAD
   geom_density2d(data = i3Sub,
+=======
+  geom_density2d(data = i2Sub,
+>>>>>>> 567067bbd2f6c32c57fd9d2d08d6d563aa1486ac
                  aes(x = Longitude, y = Latitude), size = 0.3) +
   facet_wrap(~ Event.Clearance.Group, nrow=2) +
   labs(x = 'Longitude', y='Latitude', title='Seattle Crime: Top 4 Occurring Incidents')
 
 ```
+
 
 ## Similar Packages {.tabset}
 
@@ -288,9 +323,10 @@ Some suggestions we have on features that could be added or tweaked are:
 ## Sources {.tabset}
 
 ### Package Overview
-
+https://cran.r-project.org/web/packages/ggmap/ggmap.pdf
 
 ### Important Functions
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/get_map 
 
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/ggmap 
