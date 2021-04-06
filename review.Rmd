@@ -304,13 +304,18 @@ Some suggestions we have on features that could be added or tweaked are:
 ## Sources {.tabset}
 
 ### Package Overview
-
+https://cran.r-project.org/web/packages/ggmap/ggmap.pdf
 
 ### Important Functions
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/get_map 
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/ggmap 
+
 https://www.rdocumentation.org/packages/ggmap/versions/2.6.1/topics/geocode
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/mapdist
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/qmap
 
 
