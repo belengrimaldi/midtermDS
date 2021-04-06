@@ -16,6 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+#install.packages("stringr")
+library(stringr)
 # install.packages("dplyr")
 library(dplyr)
 # install.packages("DT")
@@ -188,7 +190,7 @@ p
 
 
 ### Crime in Seattle by Year
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 # Subset of incidents with 4 years of data
 i3 <- incidents %>%
@@ -199,20 +201,29 @@ i3 <- incidents %>%
 i3 <- i3[complete.cases(i3), ]
 
 # Filter top 4 incidents
-i2Sub <-filter(i2, Event.Clearance.Group %in% c('TRAFFIC RELATED CALLS', 'DISTURBANCES', 'SUSPICIOUS CIRCUMSTANCES', 'MOTOR VEHICLE COLLISION INVESTIGATION'))
+i3Sub <-filter(i3, Event.Clearance.Group %in% c('TRAFFIC RELATED CALLS', 'DISTURBANCES', 'SUSPICIOUS CIRCUMSTANCES', 'MOTOR VEHICLE COLLISION INVESTIGATION'))
 
 # Plot for top 4 occurring incidents
 graph3 <- ggmap(get_googlemap(center = c(lon = -122.335167, lat = 47.608013),
                     zoom = 11, scale = 2,
-                    maptype ='satellite',
+                    maptype ='terrain',
                     color = 'color'))
+
+# Function to wrap title for legend
+swr = function(string, nwrap=20) {
+  paste(strwrap(string, width=nwrap), collapse="\n")
+}
+swr = Vectorize(swr)
+
+# Create line breaks in Event.Clearance.Group
+i3Sub$Event.Clearance.Group = swr(i3Sub$Event.Clearance.Group)
 
 graph3 + stat_density2d(
     aes(x = Longitude, y = Latitude, fill = ..level.., alpha =..level..),
-    size = 0.2, bins = 30, data = i2Sub,
+    size = 0.2, bins = 30, data = i3Sub,
     geom = "polygon"
   ) +
-  geom_density2d(data = i2Sub, 
+  geom_density2d(data = i3Sub,
                  aes(x = Longitude, y = Latitude), size = 0.3) +
   facet_wrap(~ Event.Clearance.Group, nrow=2) +
   labs(x = 'Longitude', y='Latitude', title='Seattle Crime: Top 4 Occurring Incidents')
@@ -281,9 +292,13 @@ Some suggestions we have on features that could be added or tweaked are:
 
 ### Important Functions
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/get_map 
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/ggmap 
+
 https://www.rdocumentation.org/packages/ggmap/versions/2.6.1/topics/geocode
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/mapdist
+
 https://www.rdocumentation.org/packages/ggmap/versions/3.0.0/topics/qmap
 
 
